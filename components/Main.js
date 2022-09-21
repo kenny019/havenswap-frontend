@@ -362,8 +362,8 @@ const Main = ({ nearId, query }) => {
 
 	const render = async () => {
 		setVerifiedArray(await getFetcher('/api/verified'));
-		const nftContracts = await getFetcher(`https://helper.testnet.near.org/account/${nearId}/likelyNFTs`);
-
+		const nftContracts = await getFetcher(`https://testnet-api.kitwallet.app/account/${nearId}/likelyNFTs`);
+		console.log(nftContracts)
 		if (nftContracts.length > 0) {
 			if (nftContracts.includes('mint.havendao.near')) {
 				setIsMonarch(true)
@@ -561,7 +561,7 @@ const Main = ({ nearId, query }) => {
 
 		setRecipientNFTs([])
 
-		if ((walletName.endsWith('.near') || walletName.length >= 64 ) && (walletName !== nearId) && finishLoading &&
+		if ((walletName.endsWith('.testnet') || walletName.length >= 64 ) && (walletName !== nearId) && finishLoading &&
 		/^(([a-z\d]+[\-_])*[a-z\d]+\.)*([a-z\d]+[\-_])*[a-z\d]+$/.test(walletName) ) {
 
 			const response = await provider.query({
@@ -571,7 +571,7 @@ const Main = ({ nearId, query }) => {
 			}).catch((err) => {})
 
 			// now do a api call to check if the wallet exists
-			const recipientContracts = await getFetcher(`https://helper.testnet.near.org/account/${walletName}/likelyNFTs`).catch((err) => {});
+			const recipientContracts = await getFetcher(`https://testnet-api.kitwallet.app/account/${walletName}/likelyNFTs`).catch((err) => {});
 
 			if (!response) {
 				setAlertObj({
