@@ -48,7 +48,7 @@ import { KeyPair, keyStores, connect, utils, providers } from "near-api-js";
 
 //network config (replace testnet with testnet or betanet)
 const provider = new providers.JsonRpcProvider({
-	url: 'https://rpc.mainnet.near.org',
+	url: 'https://rpc.testnet.near.org',
 });
 
 import crypto from 'crypto'
@@ -64,7 +64,7 @@ const getFetcher = (url) => fetch(url).then((res) => res.json());
 
 // end of testing stuff
 
-const SWAP_CONTRACT = 'v1.havenswap.near'
+const SWAP_CONTRACT = 'betaswap.testnet'
 
 const sentNFTs = [];
 const receiveNFTs = [];
@@ -362,7 +362,7 @@ const Main = ({ nearId, query }) => {
 
 	const render = async () => {
 		setVerifiedArray(await getFetcher('/api/verified'));
-		const nftContracts = await getFetcher(`https://helper.mainnet.near.org/account/${nearId}/likelyNFTs`);
+		const nftContracts = await getFetcher(`https://helper.testnet.near.org/account/${nearId}/likelyNFTs`);
 
 		if (nftContracts.length > 0) {
 			if (nftContracts.includes('mint.havendao.near')) {
@@ -388,7 +388,7 @@ const Main = ({ nearId, query }) => {
 				setAlertObj({
 					title: 'Successfully Sent Transaction',
 					status: 'success',
-					message: `https://explorer.mainnet.near.org/transactions/${decodeURIComponent(query.transactionHashes).split(',')[0]}` // change here
+					message: `https://explorer.testnet.near.org/transactions/${decodeURIComponent(query.transactionHashes).split(',')[0]}` // change here
 				})
 				return
 			}
@@ -413,7 +413,7 @@ const Main = ({ nearId, query }) => {
 
 	const getPrice = async () => {
 		try {
-			const res = await getFetcher('https://helper.mainnet.near.org/fiat');
+			const res = await getFetcher('https://helper.testnet.near.org/fiat');
 			setNearPrice(res.near.usd);
 			return
 		}
@@ -571,7 +571,7 @@ const Main = ({ nearId, query }) => {
 			}).catch((err) => {})
 
 			// now do a api call to check if the wallet exists
-			const recipientContracts = await getFetcher(`https://helper.mainnet.near.org/account/${walletName}/likelyNFTs`).catch((err) => {});
+			const recipientContracts = await getFetcher(`https://helper.testnet.near.org/account/${walletName}/likelyNFTs`).catch((err) => {});
 
 			if (!response) {
 				setAlertObj({

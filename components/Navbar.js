@@ -95,7 +95,7 @@ const Navbar = ({ setNear, nearId }) => {
 
 		if (connectText === 'Connect') {
 			wallet.requestSignIn({
-				contractId: 'v1.havenswap.near',
+				contractId: 'betaswap.testnet',
 				methodNames: ['send_offer', 'cancel_offer']
 			}, 'HavenSwap');
 		}

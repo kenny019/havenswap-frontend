@@ -35,7 +35,7 @@ import { getWallet } from '../lib/near';
 import { TransactionManager } from 'near-transaction-manager';
 import { functionCall } from 'near-api-js/lib/transaction';
 
-const SWAP_CONTRACT = 'v1.havenswap.near'
+const SWAP_CONTRACT = 'betaswap.testnet'
 
 const { Contract, KeyPair, connect, keyStores } = nearAPI;
 
@@ -44,12 +44,12 @@ let CURRENT_PRICE = 0;
 const GetOffers = async (accountId, setOfferData) => {
 
 	const config = {
-		networkId: 'mainnet',
+		networkId: 'testnet',
 		keyStore: new keyStores.InMemoryKeyStore(),
-		nodeUrl: 'https://rpc.mainnet.near.org',
-		archivalUrl: 'https://archival-rpc.mainnet.near.org',
-		walletUrl: 'https://wallet.near.org',
-		helperUrl: 'https://helper.mainnet.near.org',
+		nodeUrl: 'https://rpc.testnet.near.org',
+		archivalUrl: 'https://archival-rpc.testnet.near.org',
+		walletUrl: 'https://wallet.testnet.near.org',
+		helperUrl: 'https://helper.testnet.near.org',
 	};
 
 	try {
@@ -116,7 +116,7 @@ const GetOffers = async (accountId, setOfferData) => {
 						let collection = '';
 
 						if (nftContract === 'x.paras.near') {
-							const response = await getFetcher(`https://api-v2-mainnet.paras.id/token?token_id=${tokenId}`);
+							const response = await getFetcher(`https://api-v2-testnet.paras.id/token?token_id=${tokenId}`);
 							collection = response.data.results[0].metadata.collection_id;
 						}
 						senderNFTs.push({
@@ -167,7 +167,7 @@ const GetOffers = async (accountId, setOfferData) => {
 						let collection = '';
 						
 						if (nftContract === 'x.paras.near') {
-							const response = await getFetcher(`https://api-v2-mainnet.paras.id/token?token_id=${tokenId}`);
+							const response = await getFetcher(`https://api-v2-testnet.paras.id/token?token_id=${tokenId}`);
 							collection = response.data.results[0].metadata.collection_id;
 						}
 
@@ -286,7 +286,7 @@ const OfferCard = ({ offerData, nearId }) => {
 
 	const getPrice = async () => {
 		try {
-			const res = await getFetcher('https://helper.mainnet.near.org/fiat');
+			const res = await getFetcher('https://helper.testnet.near.org/fiat');
 			setNearPrice(res.near.usd);
 			return
 		}
@@ -498,7 +498,7 @@ const Trade = ({ nearId, query }) => {
 				setAlertObj({
 					title: 'Successfully Sent Transaction',
 					status: 'success',
-					message: `https://explorer.mainnet.near.org/transactions/${decodeURIComponent(query.transactionHashes).split(',')[0]}` // change here
+					message: `https://explorer.testnet.near.org/transactions/${decodeURIComponent(query.transactionHashes).split(',')[0]}` // change here
 				})
 				return
 			}
