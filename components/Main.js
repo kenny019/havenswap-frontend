@@ -47,9 +47,7 @@ import '@fontsource/montserrat';
 import { KeyPair, keyStores, connect, utils, providers } from "near-api-js";
 
 //network config (replace testnet with testnet or betanet)
-const provider = new providers.JsonRpcProvider({
-	url: 'https://rpc.testnet.near.org',
-});
+const provider = new providers.JsonRpcProvider('https://rpc.testnet.near.org')
 
 import crypto from 'crypto'
 
