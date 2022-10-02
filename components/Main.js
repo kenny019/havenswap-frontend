@@ -569,7 +569,7 @@ const Main = ({ nearId, query }) => {
 			}).catch((err) => {})
 
 			// now do a api call to check if the wallet exists
-			const recipientContracts = await getFetcher(`https://testnet-api.kitwallet.app/account/${walletName}/likelyNFTs`).catch((err) => {});
+			const recipientContracts = await getFetcher(`https://testnet-api.kitwallet.app/account/${walletName}/likelyNFTs`).catch((err) => {}); //
 
 			if (!response) {
 				setAlertObj({
