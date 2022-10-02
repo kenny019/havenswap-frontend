@@ -345,7 +345,7 @@ const OfferCard = ({ offerData, nearId }) => {
 
 			await wallet.requestSignTransactions({
 				transactions: transactionArr,
-				callbackUrl: 'https://swap.havendao.community/trade/'
+				callbackUrl: 'https://havenswap-frontend-j1mt.vercel.app/trade/' 
 			})
 			
 		}
@@ -379,7 +379,7 @@ const OfferCard = ({ offerData, nearId }) => {
 
 			await wallet.requestSignTransactions({
 				transactions: transactionArr,
-				callbackUrl: 'https://swap.havendao.community/trade/'
+				callbackUrl: 'https://havenswap-frontend-j1mt.vercel.app/trade/'
 			})
 		}
 		catch(err) {
