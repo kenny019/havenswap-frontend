@@ -10,6 +10,10 @@ import {
 
 import NFTCard from './NFTCard';
 
+import { MdVerified } from 'react-icons/md'
+
+import { useState } from 'react';
+
 const SkeletonCard = () => {
 	return (
 		<Skeleton
@@ -23,7 +27,7 @@ const SkeletonCard = () => {
 }
 
 
-const WalletColumn = ({ header, NFTs, init, setShowDialog, setDialogObject, verifiedArray, nearid }) => {
+const WalletColumn = ({ header, NFTs, init, setShowDialog, setDialogObject, verifiedArray, nearid, sentNFTs, receiveNFTs }) => {
 
 	const [isVerifiedClick, setVerifiedClick] = useState(false);
 	const [clickedArray, setClickedArray] = useState([]);
@@ -123,7 +127,7 @@ const WalletColumn = ({ header, NFTs, init, setShowDialog, setDialogObject, veri
 							}
 						}).map((nft, i) => {
 							return (
-								<NFTCard name={nft.name} image={nft.image} pos={i} key={i} NFTs={nft} setShowDialog={setShowDialog} setDialogObject={setDialogObject} nearid={nearid} clickedArray={clickedArray} setClickedArray={setClickedArray}/>
+								<NFTCard name={nft.name} image={nft.image} pos={i} key={i} NFTs={nft} setShowDialog={setShowDialog} setDialogObject={setDialogObject} nearid={nearid} clickedArray={clickedArray} setClickedArray={setClickedArray} receiveNFTs={receiveNFTs} sentNFTs={sentNFTs}/>
 							)
 						}) : [...Array(12)].map((x, i) => <SkeletonCard key={i}/>) : 
 						<></>

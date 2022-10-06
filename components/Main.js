@@ -3,13 +3,10 @@ import {
 	Box,
 	Button,
 	Flex,
-	Icon,
 	Heading,
-	Skeleton,
 	Image,
 	Input,
 	useDisclosure,
-	Tooltip
 } from '@chakra-ui/react';
 
 import {
@@ -27,8 +24,6 @@ import {
 } from '@chakra-ui/react'
 
 import { useState, useEffect, useRef } from 'react';
-import { MdVerified } from 'react-icons/md'
-
 
 import Dialog from './Dialog'
 import Alert from './Alert';
@@ -387,6 +382,8 @@ const Main = ({ nearId, query }) => {
 					setDialogObject={setDialogObject}
 					verifiedArray={verifiedArray}
 					nearid={nearId}
+					sentNFTs={sentNFTs}
+					receiveNFTs={receiveNFTs}
 					/>
 					<Flex /* column */
 					flexDir={'column'}
@@ -488,6 +485,8 @@ const Main = ({ nearId, query }) => {
 					verifiedArray={verifiedArray}
 					setDialogObject={setDialogObject}
 					nearid={nearId}
+					sentNFTs={sentNFTs}
+					receiveNFTs={receiveNFTs}
 					/>
 				</Flex>
 			</Box>

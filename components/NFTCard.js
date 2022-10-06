@@ -5,6 +5,7 @@ import {
     Skeleton,
 } from '@chakra-ui/react';
 
+import { useState } from 'react';
 
 const SkeletonImages = () => {
 	return (
@@ -17,7 +18,7 @@ const SkeletonImages = () => {
 	)
 }
 
-const NFTCard = ({ name, image, pos, NFTs, setShowDialog, setDialogObject, nearid, clickedArray, setClickedArray }) => {
+const NFTCard = ({ name, image, pos, NFTs, setShowDialog, setDialogObject, nearid, clickedArray, setClickedArray, sentNFTs, receiveNFTs }) => {
 	/* 
 		fetch the image from the contract
 		whilst image is being loaded, display a skeleton
