@@ -184,12 +184,7 @@ const GetOffers = async (accountId, setOfferData) => {
 						console.log(err)
 					}
 					
-
-
-
-					
 				}
-
 
 				setOfferData(oldArray => [...oldArray, {
 					sender_id: transactionData.sender_id,

@@ -1,18 +1,14 @@
 import {
 	Text,
-	IconButton,
 	Box,
 	Button,
 	Flex,
-	Grid,
 	Icon,
-	Span,
 	Heading,
 	Skeleton,
 	Image,
 	Input,
 	useDisclosure,
-	Header,
 	Tooltip
 } from '@chakra-ui/react';
 
@@ -21,7 +17,6 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
   NumberInput,
@@ -33,8 +28,12 @@ import {
 
 import { useState, useEffect, useRef } from 'react';
 import { MdVerified } from 'react-icons/md'
+
+
 import Dialog from './Dialog'
 import Alert from './Alert';
+import WalletColumn from './WalletColumn';
+
 import { getWallet } from '../lib/near';
 
 import RenderNFTs from '../lib/RenderNFTs';
@@ -44,19 +43,12 @@ import { AiOutlineSwap } from 'react-icons/ai';
 import '@fontsource/source-sans-pro';
 import '@fontsource/montserrat';
 
-import { KeyPair, keyStores, connect, utils, providers } from "near-api-js";
-
-//network config (replace testnet with testnet or betanet)
-const provider = new providers.JsonRpcProvider('https://rpc.testnet.near.org')
+import { utils, providers } from "near-api-js";
 
 import crypto from 'crypto'
 
 import { TransactionManager } from 'near-transaction-manager';
 import { functionCall } from 'near-api-js/lib/transaction';
-/* 
-	Hardcoded for testing purposes!
-	find a way to populate the likelynfts :)
-*/
 
 const getFetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -67,264 +59,8 @@ const SWAP_CONTRACT = 'betaswap.testnet'
 const sentNFTs = [];
 const receiveNFTs = [];
 
-function removeItemOnce(arr, value) {
-	var index = arr.indexOf(value);
-	if (index > -1) {
-		arr.splice(index, 1);
-	}
-	return arr;
-}
-
-const SkeletonCard = () => {
-	return (
-		<Skeleton
-		height={'115px'}
-		position={'relative'}
-		minW={'calc(33.33% - 12px)'}
-		margin={'5px'}
-		rounded={'md'}
-		/>
-	)
-}
-
-const SkeletonImages = () => {
-	return (
-		<Skeleton
-		pos={'absolute'}
-		top={'10%'}
-		h={'66px'}
-		w={'66px'}
-		/>
-	)
-}
-
-
-const NFTCard = ({ name, image, pos, NFTs, setShowDialog, setDialogObject, nearid, clickedArray, setClickedArray }) => {
-	/* 
-		fetch the image from the contract
-		whilst image is being loaded, display a skeleton
-	*/
-	const [isClicked, setIsClicked] = useState(false);
-
-	const handleClick = async (event) => {
-		event.preventDefault();
-
-		const owner = NFTs.owner;
-
-		if (!isClicked) { // user wants to trade this nft
-			// check which user does this nft belong to
-			// if owner is not recipient we push to sentNFTs
-			// else push to receiveNFTs
-
-			if (owner === nearid && !sentNFTs.some(e => `${e.name}${e.collection}` == `${NFTs.name}${NFTs.collection}`)) {
-				sentNFTs.push(NFTs);
-
-				setClickedArray(prev => [...prev, pos])
-				
-			}
-			else if (owner !== nearid && !receiveNFTs.some(e => `${e.name}${e.collection}` == `${NFTs.name}${NFTs.collection}`)) {
-				receiveNFTs.push(NFTs);
-
-				setClickedArray(prev => [...prev, pos])
-				
-			}
-
-		}
-		else {
-			if (owner === nearid && sentNFTs.some(e => `${e.name}${e.collection}` == `${NFTs.name}${NFTs.collection}`)) {
-				removeItemOnce(sentNFTs, NFTs)
-				removeItemOnce(clickedArray, pos)
-				
-
-			}
-			else if (owner !== nearid && receiveNFTs.some(e => `${e.name}${e.collection}` == `${NFTs.name}${NFTs.collection}`)) {
-				removeItemOnce(receiveNFTs, NFTs)
-				removeItemOnce(clickedArray, pos)
-			}
-		}
-
-		await setIsClicked(!isClicked);
-
-	}
-
-	const handleMouseEnter = (event) => {
-		event.preventDefault();
-		setDialogObject({
-			collection:  NFTs.collection,
-			contract: NFTs.contract
-		})
-		setShowDialog(true)
-	}
-
-	const handleMouseLeave = (event) => {
-		event.preventDefault();
-		setShowDialog(false)
-		setDialogObject({
-			collection:  '',
-			contract: ''
-		})
-	}
-
-	return (
-		<Flex
-		minH={'115px'}
-		minW={'calc(33.33% - 12px)'}
-		margin={'5px'}
-		position={'relative'}
-		cursor={'pointer'}
-		userSelect={'none'}
-		backgroundColor={'gray.800'}
-		rounded={'md'}
-		justifyContent={'center'}
-		transitionDuration={'0.5s'}
-		border={'2px solid'}
-		borderColor={NFTs.owner === nearid ? 
-			sentNFTs.some(e => `${e.name}${e.collection}` == `${NFTs.name}${NFTs.collection}`) ? '#c9c9c9' : 'transparent'
-			:
-			receiveNFTs.some(e => `${e.name}${e.collection}` == `${NFTs.name}${NFTs.collection}`) ? '#c9c9c9' : 'transparent'
-		}
-		_hover={{
-			border: '2px solid #c9c9c9'
-		}}
-		onClick={handleClick}
-		onMouseEnter={handleMouseEnter}
-		onMouseLeave={handleMouseLeave}
-		>
-			<Image
-			objectFit={'cover'}
-			pos={'absolute'}
-			top={'10%'}
-			maxW={'66px'}
-			maxH={'66px'}
-			fallback={<SkeletonImages/>}
-			alt={name}
-			src={image}
-			/>
-
-			<Text /* reminder to cut name if too long use ... */
-			pos={'absolute'}
-			bottom={'0.3rem'}
-			maxW={'100px'}
-			isTruncated
-			>
-			{/*name*/}
-			{pos}
-			</Text>
-			
-		</Flex>
-	)
-}
-
-const WalletColumn = ({ header, NFTs, init, setShowDialog, setDialogObject, verifiedArray, nearid }) => {
-
-	const [isVerifiedClick, setVerifiedClick] = useState(false);
-	const [clickedArray, setClickedArray] = useState([]);
-
-	const [searchFilter, setSearchFilter] = useState('');
-	const handleFilter = (event) => setSearchFilter(event.target.value);
-
-	const verifiedHandler = (e) => {
-		e.preventDefault();
-		setVerifiedClick(!isVerifiedClick)
-	}
-
-	return (
-		<Flex /* column */
-		flexDir={'column'}
-		flexBasis={'100%'}
-		flex={'1 1 0'}
-		>
-			<Box
-			padding={'0.75rem'}
-			minW={'350px'} /* placeholder */
-			> {/* User Wallet */}
-				<Flex
-				userSelect={'none'}
-				alignItems={'center'}
-				backgroundColor={'gray.800'}
-				py={'0.75rem'}
-				px={'1rem'}
-				roundedTop={'lg'}
-				boxShadow={'0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)'}
-				borderBottom={'1px solid #2D3748'}
-				my={'0.2rem'}
-				> {/* Panel Header */}
-					<Text flexGrow={1} color={'gray.100'} fontWeight={'semibold'} fontFamily={'montserrat'} fontSize={'1rem'}>{header}</Text>
-					<Input 
-					mx={'1rem'}
-					colorScheme={'gray.100'}
-					placeholder={'Collection Name'}
-					size={'md'}
-					onChange={handleFilter}
-					/>
-					<Tooltip label={'Toggle Verified Collections'} shouldWrapChildren>
-						<Icon 
-						cursor={'pointer'}
-						mr={'0.2rem'} 
-						h={'1.5rem'} 
-						w={'1.5rem'} 
-						color={!isVerifiedClick ? 'gray.400' : 'blue.200'} 
-						as={MdVerified}
-						onClick={verifiedHandler}
-						_hover={{
-							color: 'blue.200'
-						}}
-						/>
-					</Tooltip>
-					
-				</Flex>
-				<Flex
-				alignItems={'flex-start'}
-				flexWrap={'wrap'}
-				alignContent={'flex-start'}
-				overflowY={'scroll'}
-				overflowX={'hidden'}
-				height={'350px'} /* placeholder */
-				sx={{
-					'&::-webkit-scrollbar': {
-					width: '10px',
-					backgroundColor: 'gray.700',
-					},
-					'&::-webkit-scrollbar-thumb': {
-					backgroundColor: 'gray.300',
-					},
-				}}
-				padding={0}
-				backgroundColor={'#161617'}
-				> {/* Panel Cards */}
-				{
-					init ? 
-						NFTs.length > 0 ? NFTs.filter((nft) => {
-							if (isVerifiedClick) {
-								if (searchFilter == "" && (verifiedArray.includes(nft.collection) || verifiedArray.includes(nft.contract))) {
-									return nft
-								} 
-								else if (nft.collection.toLowerCase().includes(searchFilter.toLowerCase()) || nft.name.toLowerCase().includes(searchFilter.toLowerCase())) {
-									if (verifiedArray.includes(nft.collection) || verifiedArray.includes(nft.contract)) {
-										return nft
-									}
-								}
-							}
-							else {
-								if (searchFilter == "") {
-									return nft
-								} 
-								else if (nft.collection.toLowerCase().includes(searchFilter.toLowerCase()) || nft.name.toLowerCase().includes(searchFilter.toLowerCase())) {
-									return nft
-								}
-							}
-						}).map((nft, i) => {
-							return (
-								<NFTCard name={nft.name} image={nft.image} pos={i} key={i} NFTs={nft} setShowDialog={setShowDialog} setDialogObject={setDialogObject} nearid={nearid} clickedArray={clickedArray} setClickedArray={setClickedArray}/>
-							)
-						}) : [...Array(12)].map((x, i) => <SkeletonCard key={i}/>) : 
-						<></>
-				}
-				</Flex>
-			</Box>
-		</Flex>
-	)
-}
+//network config (replace testnet with testnet or betanet)
+const provider = new providers.JsonRpcProvider('https://rpc.testnet.near.org')
 
 const Main = ({ nearId, query }) => {
 
@@ -333,10 +69,7 @@ const Main = ({ nearId, query }) => {
 	const [finishLoading, setFinishLoading] = useState(true);
 	
 	const [isLoaded, setIsLoaded] = useState(false);
-
-	const [showVerifiedSender, setShowVerifiedSender] = useState(false);
-	const [showVerifiedReceive, setShowVerifiedReceive] = useState(false);
-
+	
 	const [isLegalWallet, setisLegalWallet] = useState(true);
 	const [isLoadRecipient, setLoadRecipient] = useState(false);
 
@@ -344,7 +77,7 @@ const Main = ({ nearId, query }) => {
 	const [dialogObject, setDialogObject] = useState({ contract: '', collection: ''});
 
 	const [showAlert, setShowAlert] = useState(false);
-	const [alertObj, setAlertObj] = useState({})
+	const [alertObj, setAlertObj] = useState({});
 
 	const [walletInput, setWalletInput] = useState('');
 
@@ -433,7 +166,6 @@ const Main = ({ nearId, query }) => {
 		getPrice();
 	}, [nearId]);
 
-
 	const submitHandler = (event) => {
 		event.preventDefault();
 
@@ -443,10 +175,10 @@ const Main = ({ nearId, query }) => {
 		}
 
 		if (sentNFTs.length < 1 && receiveNFTs.length < 1) {
-			return
+			return;
 		}
 
-		onOpen()
+		onOpen();
 	}
 
 	const confirmHandler = async (event) => {
@@ -535,7 +267,7 @@ const Main = ({ nearId, query }) => {
 		
 
 		try {
-			const outcomes = await transactionManager.bundleCreateSignAndSendTransactions(transactionArr);
+			const outcomes = await transactionManager.bundleCreateSignAndSendTransactions(transactionArr); // we dont use the return
 		}
 		catch(err) {
 			
