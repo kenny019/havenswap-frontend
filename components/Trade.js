@@ -39,8 +39,6 @@ const SWAP_CONTRACT = 'betaswap.testnet'
 
 const { Contract, KeyPair, connect, keyStores } = nearAPI;
 
-let CURRENT_PRICE = 0;
-
 const GetOffers = async (accountId, setOfferData) => {
 
 	const config = {

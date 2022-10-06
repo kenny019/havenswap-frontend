@@ -3,7 +3,7 @@ import {
 	Image,
 	Text,
     Skeleton,
-} from 'chakra-ui/react';
+} from '@chakra-ui/react';
 
 
 const SkeletonImages = () => {
