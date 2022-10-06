@@ -14,6 +14,7 @@ import { MdVerified } from 'react-icons/md'
 
 import { useState } from 'react';
 
+
 const SkeletonCard = () => {
 	return (
 		<Skeleton

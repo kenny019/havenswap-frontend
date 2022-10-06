@@ -20,24 +20,18 @@ import '@fontsource/montserrat'
 import '@fontsource/source-sans-pro'
 
 import Alert from './Alert';
+import OfferCard from './OfferCard';
 
-import { useState, useEffect, useRef } from 'react';
-
-import { MdVerified } from 'react-icons/md'
+import { useState, useEffect } from 'react';
 
 import * as nearAPI from 'near-api-js';
 import Big from 'big-js';
 
-import { utils } from 'near-api-js';
-
-import { getWallet } from '../lib/near';
-
-import { TransactionManager } from 'near-transaction-manager';
-import { functionCall } from 'near-api-js/lib/transaction';
-
 const SWAP_CONTRACT = 'betaswap.testnet'
 
 const { Contract, KeyPair, connect, keyStores } = nearAPI;
+
+const getFetcher = (url) => fetch(url).then((res) => res.json());
 
 const GetOffers = async (accountId, setOfferData) => {
 
@@ -131,12 +125,9 @@ const GetOffers = async (accountId, setOfferData) => {
 					
 				}
 
-
 				for (const nft of transactionData.receiver_nfts) {
 					const nftContract = nft.contract_id;
 					const tokenId = nft.token_id;
-
-					
 
 					try {
 						const contract3 = new Contract(
@@ -146,7 +137,6 @@ const GetOffers = async (accountId, setOfferData) => {
 								viewMethods: ['nft_metadata', 'nft_token'],
 							}
 						);
-
 
 						const metadata = await contract3.nft_metadata();
 
@@ -176,7 +166,6 @@ const GetOffers = async (accountId, setOfferData) => {
 							contract_id: nftContract,
 							collection: collection ? collection : metadata.name,
 						})
-
 					}
 					catch(err) {
 						console.log(err)
@@ -209,275 +198,6 @@ const GetOffers = async (accountId, setOfferData) => {
 
 		
 }	
-
-const getFetcher = (url) => fetch(url).then((res) => res.json());
-
-const SkeletonImages = () => {
-	return (
-		<Skeleton
-		top={'10%'}
-		w={['66px', '140px']} 
-		/>
-	)
-}
-
-const ImageCard = ({imageLink, title, tokenId, contract, collection}) => {
-	const [verifiedArray, setVerifiedArray] = useState([]);
-
-	const setVerified = async () => {
-		setVerifiedArray(await getFetcher('/api/verified'));
-	}
-
-	useEffect(() => {
-		setVerified();
-	}, [])
-	
-	return (
-		<Flex
-		margin={'5px'}
-		userSelect={'none'}
-		alignItems={'center'}
-		flexDir={'column'}
-		>
-			<Image
-			objectFit={'cover'}
-			w={['66px', '140px']} 
-			alt={tokenId} 
-			src={imageLink}
-			top={'10%'}
-			fallback={<SkeletonImages/>}
-			/>
-			{verifiedArray.includes(contract) ? <Icon
-			pos={'absolute'}
-			h={'0.9rem'} w={'1rem'} color={'blue.300'} marginTop={['3.35rem','8.1rem']} as={MdVerified}
-			/> : <></>}
-			<Text fontFamily={'montserrat'} maxW={['66px', '140px']} isTruncated textColor={'gray.200'} fontSize={['0.5rem', '0.6rem']} mt={'0.2rem'}>{collection}</Text>
-			<Text fontFamily={'montserrat'} maxW={['66px', '140px']} isTruncated>{title}</Text>
-			<Text fontFamily={'montserrat'} maxW={['66px', '140px']} isTruncated textColor={'gray.300'} fontSize={['0.6rem', '0.8rem']} mb={'0.5rem'}>{contract}</Text>
-		</Flex>
-	)
-}
-
-const OfferCard = ({ offerData, nearId }) => {
-
-	const nanos = offerData.timestamp.toString()
-	const timestamp = nanos.substring(
-		0,
-		nanos.length - 6
-	);
-
-	const offerTime = new Intl.DateTimeFormat('default', {
-		day: 'numeric',
-		month: 'numeric',
-		year: 'numeric',
-		hour: 'numeric',
-		minute: 'numeric',
-		second: 'numeric'
-	}).format(parseInt(timestamp));
-
-	const [nearPrice, setNearPrice] = useState(0);
-
-	const getPrice = async () => {
-		try {
-			const res = await getFetcher('https://helper.testnet.near.org/fiat');
-			setNearPrice(res.near.usd);
-			return
-		}
-		catch(err) {
-			setNearPrice(0);
-			return;
-		}
-	}
-
-	useEffect(() => {
-		getPrice()
-	}, [])
-
-	const acceptOffer = async (event) => {
-		event.preventDefault();
-
-		try { // nft_transfer_call
-			const { near, wallet } = await getWallet();
-			const transactionManager = TransactionManager.fromWallet(wallet);
-			
-			const transactionArr = [];
-
-			let tempSent = [];
-
-			offerData._received_nfts.forEach((sent) => {
-				tempSent.push(JSON.stringify(sent))
-			})
-
-			const nftsToSend = offerData.receiver_nfts.filter((obj) => {
-				
-				let compareobj = {
-					contract_id: obj.contract_id,
-					token_id: obj.token_id,
-				}
-				
-				if (!tempSent.includes(JSON.stringify(compareobj))) return obj;
-			});
-
-			
-			const hash = offerData.hash;
-
-
-			for (const nft of nftsToSend) {
-				const transaction = await transactionManager.createTransaction({
-					receiverId: nft.contract_id,
-					actions: [functionCall('nft_transfer_call', {
-						receiver_id: SWAP_CONTRACT,
-						token_id: nft.token_id,
-						approval_id: 0,
-						msg: hash,
-					}, 300000000000000, 1)]
-				});
-				transactionArr.push(transaction)
-			}
-			// const outcomes = await transactionManager.bundleCreateSignAndSendTransactions(transactionArr);
-
-			await wallet.requestSignTransactions({
-				transactions: transactionArr,
-				callbackUrl: 'https://havenswap-frontend-j1mt.vercel.app/trade/' 
-			})
-			
-		}
-		catch (err) {
-			
-		}
-		
-	}
-
-	const cancelOffer = async (event) => {
-		event.preventDefault();
-
-		try {
-			const { near, wallet } = await getWallet();
-			const transactionManager = TransactionManager.fromWallet(wallet);
-
-			const transactionArr = [];
-
-			const hash = offerData.hash;
-
-			const transaction = await transactionManager.createTransaction({
-				receiverId: SWAP_CONTRACT,
-				actions: [functionCall('cancel_offer', {
-					hash: hash,
-				}, 300000000000000, 1)]
-			}
-			)
-			await transactionArr.push(transaction)
-
-			// const outcomes = await transactionManager.bundleCreateSignAndSendTransactions(transactionArr);
-
-			await wallet.requestSignTransactions({
-				transactions: transactionArr,
-				callbackUrl: 'https://havenswap-frontend-j1mt.vercel.app/trade/'
-			})
-		}
-		catch(err) {
-
-		}
-		
-	}
-
-	return (
-		<Box
-		px={'1rem'}
-		py={'2rem'}
-		backgroundColor={'#161617'}
-		my={'1rem'}
-		rounded={'lg'}
-		boxShadow={'0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%)'}
-		border={'1px'}
-		borderColor={'gray.800'}
-		>
-			<Flex
-			flexDir={'column'}
-			mx={'1rem'}
-			>
-				<Box 
-				borderBottom={'1px'}
-				borderBottomColor={'gray.700'}
-				mb={'1rem'}
-				>
-					<Text fontFamily={'montserrat'} fontSize={'xs'} color={'gray.300'}>{offerTime}</Text>
-					<Text fontFamily={'montserrat'} fontSize={['md', 'xl']}>Sender: {offerData.sender_id}</Text>
-					{<Text fontFamily={'montserrat'} fontSize={['sm', 'md']} color={'gray.200'}>NEAR: {utils.format.formatNearAmount(offerData.sender_near)} Ⓝ (${
-						(parseFloat(utils.format.formatNearAmount(offerData.sender_near)) * nearPrice).toFixed(2)
-					})</Text>}
-					<Flex my={'1rem'}
-					alignItems={'flex-start'}
-					flexWrap={'wrap'}
-					alignContent={'flex-start'}
-					overflowX={'hidden'}
-					> 
-					{offerData.sender_nfts.length > 0 ? offerData.sender_nfts.map((nft, i) => {
-						return (
-							<ImageCard 
-							key={i} 
-							imageLink={nft.image} 
-							title={nft.title} 
-							tokenId={nft.token_id} 
-							contract={nft.contract_id}
-							collection={nft.collection}
-							/>
-						)
-					}) : <></>}
-						
-					</Flex>
-				</Box>
-				<Box 
-				mb={'1rem'}
-				>
-					<Text fontFamily={'montserrat'} fontSize={['md', 'xl']}>Receiver: {offerData.receiver_id}</Text>
-					<Flex my={'1rem'} 
-					alignItems={'flex-start'}
-					flexWrap={'wrap'}
-					alignContent={'flex-start'}
-					overflowX={'hidden'}>
-						{offerData.receiver_nfts.length > 0 ? offerData.receiver_nfts.map((nft, i) => {
-						return (
-							<ImageCard 
-							key={i} 
-							imageLink={nft.image} 
-							title={nft.title} 
-							tokenId={nft.token_id} 
-							contract={nft.contract_id}
-							collection={nft.collection}
-							/>
-						)
-					}) : <></>}
-					</Flex>
-				</Box>
-				<Box>
-					{
-					offerData.sender_id !== nearId ?
-					<Button 
-					backgroundColor={'green.600'} 
-					onClick={acceptOffer}
-					mr={'1rem'}
-					mb={['1rem', '0']}
-					_hover={{
-						backgroundColor: 'green.500',
-					}}>Accept
-					</Button>
-					:
-					<></>
-					}
-					<Button 
-					onClick={cancelOffer}
-					backgroundColor={'red.600'}
-					_hover={{
-						backgroundColor: 'red.500',
-					}}
-					>Cancel</Button>
-				</Box>
-			</Flex>
-		</Box>
-		
-	)
-}
 
 const Trade = ({ nearId, query }) => {
 

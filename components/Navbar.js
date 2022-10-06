@@ -31,7 +31,6 @@ import Alert from './Alert';
 
 import Link from 'next/link';
 
-
 const NavItem = ({name, link}) => {
 	return (
 		<Link href={link} passHref>
