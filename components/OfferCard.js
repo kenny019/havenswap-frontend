@@ -17,6 +17,9 @@ import { getWallet } from '../lib/near';
 
 import { functionCall } from 'near-api-js/lib/transaction';
 
+
+const SWAP_CONTRACT = 'betaswap.testnet';
+
 const getFetcher = (url) => fetch(url).then((res) => res.json());
 
 const OfferCard = ({ offerData, nearId }) => {
@@ -95,7 +98,7 @@ const OfferCard = ({ offerData, nearId }) => {
 				});
 				transactionArr.push(transaction)
 			}
-			// const outcomes = await transactionManager.bundleCreateSignAndSendTransactions(transactionArr);
+			const outcomes = await transactionManager.bundleCreateSignAndSendTransactions(transactionArr);
 
 			await wallet.requestSignTransactions({
 				transactions: transactionArr,
@@ -129,7 +132,7 @@ const OfferCard = ({ offerData, nearId }) => {
 			)
 			await transactionArr.push(transaction)
 
-			// const outcomes = await transactionManager.bundleCreateSignAndSendTransactions(transactionArr);
+			const outcomes = await transactionManager.bundleCreateSignAndSendTransactions(transactionArr);
 
 			await wallet.requestSignTransactions({
 				transactions: transactionArr,
