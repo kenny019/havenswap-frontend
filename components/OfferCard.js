@@ -18,8 +18,6 @@ import { getWallet } from '../lib/near';
 import { functionCall } from 'near-api-js/lib/transaction';
 
 
-const SWAP_CONTRACT = 'betaswap.testnet';
-
 const getFetcher = (url) => fetch(url).then((res) => res.json());
 
 const OfferCard = ({ offerData, nearId }) => {
@@ -59,6 +57,7 @@ const OfferCard = ({ offerData, nearId }) => {
 
 	const acceptOffer = async (event) => {
 		event.preventDefault();
+		const SWAP_CONTRACT = 'betaswap.testnet';
 
 		try { // nft_transfer_call
 			const { near, wallet } = await getWallet();
@@ -116,6 +115,8 @@ const OfferCard = ({ offerData, nearId }) => {
 		event.preventDefault();
 
 		try {
+			const SWAP_CONTRACT = 'betaswap.testnet';
+
 			const { near, wallet } = await getWallet();
 			const transactionManager = TransactionManager.fromWallet(wallet);
 
