@@ -98,7 +98,7 @@ const OfferCard = ({ offerData, nearId }) => {
 				});
 				transactionArr.push(transaction)
 			}
-			const outcomes = await transactionManager.bundleCreateSignAndSendTransactions(transactionArr);
+			// const outcomes = await transactionManager.bundleCreateSignAndSendTransactions(transactionArr);
 
 			await wallet.requestSignTransactions({
 				transactions: transactionArr,
@@ -132,7 +132,7 @@ const OfferCard = ({ offerData, nearId }) => {
 			)
 			await transactionArr.push(transaction)
 
-			const outcomes = await transactionManager.bundleCreateSignAndSendTransactions(transactionArr);
+			// const outcomes = await transactionManager.bundleCreateSignAndSendTransactions(transactionArr);
 
 			await wallet.requestSignTransactions({
 				transactions: transactionArr,
